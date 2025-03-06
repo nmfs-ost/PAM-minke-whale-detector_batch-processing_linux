@@ -579,6 +579,10 @@ def run():
         logger.info(str(int(
             nfiles_errors)) + ' files had errors and were not processed. Check the error logs for more details.')
 
+    #write out a file indicating the process finished (allows for workaround to memory leak w/ tensorflow predict)
+    with open('donefile.txt', 'w') as donefile:
+        donefile.write('im done')
+
     # close logs
     logging.shutdown()
 
