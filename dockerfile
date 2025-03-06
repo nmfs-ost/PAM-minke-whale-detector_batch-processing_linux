@@ -3,7 +3,7 @@ FROM python:3.9
 WORKDIR /app
 
 #copy and run python requirements
-COPY requirements.txt /app
+COPY /scripts/requirements.txt /app
 RUN pip install -r requirements.txt
 
 #copy application files
