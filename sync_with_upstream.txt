@@ -1,0 +1,11 @@
+git checkout main
+git fetch upstream
+git rebase upstream/main
+git push origin main
+
+git checkout docker
+git rebase main 
+
+(may force a merge)
+
+git push origin docker --force

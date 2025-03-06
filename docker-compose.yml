@@ -1,0 +1,52 @@
+version: '3.8'
+
+#build detector if haven't yet published
+services:
+  rclone-input:
+    image: rclone/rclone:latest
+    command: mount pamdata-gcs:${AUDIO_FOLDER} /mnt/input --allow-other --config /config/rclone.conf --allow-non-empty
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - .:/config
+      - ./input:/mnt/input:shared
+  rclone-output:
+    image: rclone/rclone:latest
+    command: mount pamdata-gcs:${OUTPUT_FOLDER}/${DEPLOYMENT_ID} /mnt/output --allow-other --vfs-cache-mode writes --config /config/rclone.conf --allow-non-empty
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - .:/config
+      - ./output:/mnt/output:shared
+  nefsc-minke-detector:
+    #build:
+    #  context: .
+    image: us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest
+    depends_on:
+      - rclone-input
+      - rclone-output
+    volumes:
+      - ./input:/input:shared,ro
+      - ./output:/output:shared
+    environment:
+      DEPLOYMENT_ID: ${DEPLOYMENT_ID}
+      CHANNEL: ${CHANNEL}
+      EXTENSION: ${EXTENSION}
+      BATCH_SIZE: ${BATCH_SIZE}
+      STEP_SEC: ${STEP_SEC}
+      SMOOTH_SEC: ${SMOOTH_SEC}
+      THRESHOLD: ${THRESHOLD}
+      MIN_DUR_SEC: ${MIN_DUR_SEC}
+      MAX_DUR_SEC: ${MAX_DUR_SEC}
+      CLASS_ID: ${CLASS_ID}
+      CHUNK_SIZE_SEC: ${CHUNK_SIZE_SEC}
+      MIN_CONFIDENCE: ${MIN_CONFIDENCE}
+      RECURSIVE: ${RECURSIVE}
