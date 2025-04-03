@@ -18,41 +18,55 @@ docker compose up
 
 cloud run loop: 
 
-INPUT_PATHS=("nefsc-1/bottom_mounted/NEFSC_SBNMS/NEFSC_SBNMS_201908_SB01" "nefsc-1/bottom_mounted/NEFSC_SBNMS/NEFSC_SBNMS_201908_SB02")
-#INPUT_PATHS=("afsc-1/bottom_mounted/BS13_AU_PM02-a/05_2013" "afsc-1/bottom_mounted/BS13_AU_PM02-a/06_2013")
+INPUT_PATHS=("nefsc-1/bottom_mounted/NEFSC_MA-RI/NEFSC_MA-RI_202103_NS02/5420_48kHz_UTC" "nefsc-1/bottom_mounted/NEFSC_SBNMS/NEFSC_SBNMS_202004_SB01/67403784_48kHz" "nefsc-1/bottom_mounted/NEFSC_GOM/NEFSC_GOM_202204_YORK/NEFSC_GOM_202204_YORK_ST/5419_48kHz_UTC" "nefsc-1/bottom_mounted/NEFSC_SBNMS/NEFSC_SBNMS_202206_SB03/1677778970_48kHz" "nefsc-1/bottom_mounted/NEFSC_GOM/NEFSC_GOM_202107_LUBEC/NEFSC_GOM_202107_LUBEC_ST/5426_48kHz_UTC")
 
 LENGTH=${#INPUT_PATHS[@]}
 
 for (( i=0; i<LENGTH; i++ )); do
 
   DATA_PATH="${INPUT_PATHS[$i]}"
-  OUTPUT_PATH=pamdata-app-outputs/appdev/test_output_wav_reader
-  DEPLOYMENT_ID='parallel-nefsc-data-test'
+  OUTPUT_PATH=pamdata-app-outputs/nefsc_minke/prod
+  DEPLOYMENT_ID='parallel-nefsc-data-batchsize-1024'
 
-  RECURSIVE="True"
-  EXTENSION=".wav"
-  CHUNK_SIZE_SEC=60
+  RECURSIVE=True
+  EXTENSION=.wav
+  BATCH_SIZE=1024
+  CHANNEL=1
+  SUMMARY_TIME_OFFSET=-5
+  THRESHOLD=0.1
+  MIN_CONFIDENCE=0.6
+  CHUNK_SIZE_SEC=3600
 
-  #how to handle this in batch? 
-  #CHANNEL=4
-  
-  #optional, use defaults
-  #BATCH_SIZE= ${BATCH_SIZE}
-  #STEP_SEC= ${STEP_SEC}
-  #SMOOTH_SEC= ${SMOOTH_SEC}
-  #THRESHOLD= ${THRESHOLD}
-  #MIN_DUR_SEC= 
-  #MAX_DUR_SEC= 
-  #CLASS_ID= 
-  #MIN_CONFIDENCE=
+gcloud beta run jobs deploy nefsc-minke-detector-$DEPLOYMENT_ID-$i --update-env-vars DEPLOYMENT_ID=${DEPLOYMENT_ID},CHANNEL=${CHANNEL},EXTENSION=${EXTENSION},BATCH_SIZE=${BATCH_SIZE},STEP_SEC=${STEP_SEC},SMOOTH_SEC=${SMOOTH_SEC},THRESHOLD=${THRESHOLD},MIN_DUR_SEC=${MIN_DUR_SEC},MAX_DUR_SEC=${MAX_DUR_SEC},CLASS_ID=${CLASS_ID},CHUNK_SIZE_SEC=${CHUNK_SIZE_SEC},MIN_CONFIDENCE=${MIN_CONFIDENCE},RECURSIVE=${RECURSIVE},SUMMARY_TIME_OFFSET=${SUMMARY_TIME_OFFSET} --image us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest --add-volume name=input-volume,type=cloud-storage,bucket=$(echo $DATA_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $DATA_PATH | cut -d "/" -f2-) --add-volume name=output-volume,type=cloud-storage,bucket=$(echo $OUTPUT_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $OUTPUT_PATH | cut -d "/" -f2-)/$(echo $DATA_PATH | rev | cut -d "/" -f1-2 | rev) --add-volume-mount volume=input-volume,mount-path=/input --add-volume-mount volume=output-volume,mount-path=/output --service-account=app-dev-sa@ggn-nmfs-pamdata-prod-1.iam.gserviceaccount.com --region=us-east4 --memory=32Gi --cpu 8 --task-timeout 168h --labels deployment-id=${DEPLOYMENT_ID} --labels detector-name=nefsc-minke-detector
 
-  gcloud beta run jobs deploy nefsc-minke-detector-$DEPLOYMENT_ID-$i --update-env-vars DEPLOYMENT_ID=${DEPLOYMENT_ID},CHANNEL=${CHANNEL},EXTENSION=${EXTENSION},BATCH_SIZE=${BATCH_SIZE},STEP_SEC=${STEP_SEC},SMOOTH_SEC=${SMOOTH_SEC},THRESHOLD=${THRESHOLD},MIN_DUR_SEC=${MIN_DUR_SEC},MAX_DUR_SEC=${MAX_DUR_SEC},CLASS_ID=${CLASS_ID},CHUNK_SIZE_SEC=${CHUNK_SIZE_SEC},MIN_CONFIDENCE=${MIN_CONFIDENCE},RECURSIVE=${RECURSIVE} --image us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest --add-volume name=input-volume,type=cloud-storage,bucket=$(echo $DATA_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $DATA_PATH | cut -d "/" -f2-) --add-volume name=output-volume,type=cloud-storage,bucket=$(echo $OUTPUT_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $OUTPUT_PATH | cut -d "/" -f2-)/$(echo $DATA_PATH | rev | cut -d "/" -f1 | rev) --add-volume-mount volume=input-volume,mount-path=/input --add-volume-mount volume=output-volume,mount-path=/output --service-account=app-dev-sa@ggn-nmfs-pamdata-prod-1.iam.gserviceaccount.com --region=us-east4 --memory=32Gi --cpu 8 --task-timeout 168h
-
-  gcloud run jobs execute nefsc-minke-detector-$DEPLOYMENT_ID-$i --region=us-east4;
+gcloud run jobs execute nefsc-minke-detector-$DEPLOYMENT_ID-$i --region=us-east4;
 
 done
 
-#note- cloud run job does not have GPU, but has long timeout. cloud run has GPU, but max of 1hr timeout. 
-#qs for xavier: how to make sure parameters are such to return detections? can we tune to make it produce fewer files, 
-#single structured data file for the run? are the log entries (600s file processed in 12s) normal performance? 
-#
+#another example:
+
+INPUT_PATHS=("nefsc-1/bottom_mounted/NEFSC_DE/NEFSC_DE_202311_DB03/6106_48kHz_UTC" "nefsc-1/bottom_mounted/NEFSC_GOM/NEFSC_GOM_202108_MATINICUS/NEFSC_GOM_202108_MATINICUS_ST/5429_48kHz_UTC")
+
+LENGTH=${#INPUT_PATHS[@]}
+
+for (( i=0; i<LENGTH; i++ )); do
+
+  DATA_PATH="${INPUT_PATHS[$i]}"
+  OUTPUT_PATH=pamdata-app-outputs/nefsc_minke/prod
+  DEPLOYMENT_ID='parallel-nefsc-data-batchsize-512'
+
+  RECURSIVE=True
+  EXTENSION=.wav
+  BATCH_SIZE=512
+  CHANNEL=1
+  SUMMARY_TIME_OFFSET=-5
+  THRESHOLD=0.1
+  MIN_CONFIDENCE=0.6
+  CHUNK_SIZE_SEC=3600
+
+gcloud beta run jobs deploy nefsc-minke-detector-$DEPLOYMENT_ID-$i --update-env-vars DEPLOYMENT_ID=${DEPLOYMENT_ID},CHANNEL=${CHANNEL},EXTENSION=${EXTENSION},BATCH_SIZE=${BATCH_SIZE},STEP_SEC=${STEP_SEC},SMOOTH_SEC=${SMOOTH_SEC},THRESHOLD=${THRESHOLD},MIN_DUR_SEC=${MIN_DUR_SEC},MAX_DUR_SEC=${MAX_DUR_SEC},CLASS_ID=${CLASS_ID},CHUNK_SIZE_SEC=${CHUNK_SIZE_SEC},MIN_CONFIDENCE=${MIN_CONFIDENCE},RECURSIVE=${RECURSIVE},SUMMARY_TIME_OFFSET=${SUMMARY_TIME_OFFSET} --image us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest --add-volume name=input-volume,type=cloud-storage,bucket=$(echo $DATA_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $DATA_PATH | cut -d "/" -f2-) --add-volume name=output-volume,type=cloud-storage,bucket=$(echo $OUTPUT_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $OUTPUT_PATH | cut -d "/" -f2-)/$(echo $DATA_PATH | rev | cut -d "/" -f1-2 | rev) --add-volume-mount volume=input-volume,mount-path=/input --add-volume-mount volume=output-volume,mount-path=/output --service-account=app-dev-sa@ggn-nmfs-pamdata-prod-1.iam.gserviceaccount.com --region=us-east4 --memory=32Gi --cpu 8 --task-timeout 168h --labels deployment-id=${DEPLOYMENT_ID}
+
+gcloud run jobs execute nefsc-minke-detector-$DEPLOYMENT_ID-$i --region=us-east4;
+
+done
+

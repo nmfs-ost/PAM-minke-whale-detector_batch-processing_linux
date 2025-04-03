@@ -4,6 +4,7 @@
 
 CMD1="python /app/run_ketos_detector.py"
 CMD2="python /app/create_detection_spectrograms_and_spreadsheet.py"
+CMD3="python /app/MIWH_HUWH_merge_netcdf_files.py"
 
 [ "${RECURSIVE}" = "True" ] && CMD1+=" --recursive"
 [ ! -z "${CHANNEL}" ] && CMD1+=" --channel=$CHANNEL"
@@ -38,3 +39,11 @@ CMD2+=" --detec_dir=/output/"
 
 echo $CMD2
 eval $CMD2
+
+echo $CMD3
+eval $CMD3
+
+
+
+
+

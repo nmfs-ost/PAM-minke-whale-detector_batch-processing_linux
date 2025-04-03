@@ -1,10 +1,10 @@
-DATA_PATH=nefsc-1/bottom_mounted/NEFSC_GOM/NEFSC_GOM_202205_USTR03/6568_48kHz_UTC
-OUTPUT_PATH=pamdata-app-outputs/appdev/new_repo_container_test
-DEPLOYMENT_ID=new_repo_container_test
+DATA_PATH=nefsc-1/bottom_mounted/NEFSC_SBNMS/NEFSC_SBNMS_202210_SB03/NEFSC_SBNMS_202210_SB03_ST/1678008346_48kHz_UTC
+OUTPUT_PATH=pamdata-app-outputs/appdev/minke_second_test
+DEPLOYMENT_ID=second-test
 
 RECURSIVE=True
 EXTENSION=.wav
-BATCH_SIZE=1024
+BATCH_SIZE=512
 CHANNEL=1
 SUMMARY_TIME_OFFSET=-5
 THRESHOLD=0.1
