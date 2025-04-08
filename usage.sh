@@ -3,7 +3,7 @@
 ###########parameters (can modify):
 
 OUTPUT_PATH=nefsc-1-detector-output/PYTHON_MINKE/KETOS_v0.2/Raw
-DEPLOYMENT_ID='my-new-deployment' #allows us to distinguish different runs by billing/stats. Not needed to change each time in production
+DEPLOYMENT_ID='my-new-deployment' #allows us to distinguish different runs by billing/stats. Not needed to change each time in production, but good practice (helps you locate cloud run information if needed)
 
 RECURSIVE=True
 EXTENSION=.wav
@@ -15,6 +15,7 @@ THRESHOLD=0.1
 MIN_CONFIDENCE=0.6
 CHUNK_SIZE_SEC=3600
 
+#full cloud path, each item in quotes, separated by space, one or multiple. 
 INPUT_PATHS=("nefsc-1/bottom_mounted/NEFSC_DE/NEFSC_DE_202311_DB03/6106_48kHz_UTC" "nefsc-1/bottom_mounted/NEFSC_GOM/NEFSC_GOM_202108_MATINICUS/NEFSC_GOM_202108_MATINICUS_ST/5429_48kHz_UTC")
 
 ###########Do not modify
