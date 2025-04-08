@@ -1,72 +1,33 @@
-publish container
+###########Start of example
 
-docker build -t nefsc-minke-detector .
+###########parameters (can modify):
 
-gcloud auth configure-docker us-east4-docker.pkg.dev
+OUTPUT_PATH=nefsc-1-detector-output/PYTHON_MINKE/KETOS_v0.2/Raw
+DEPLOYMENT_ID='my-new-deployment' #allows us to distinguish different runs by billing/stats. Not needed to change each time in production
 
-docker tag nefsc-minke-detector us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest
-
-DOCKER_CONTENT_TRUST=0 docker push us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest
-
-
-docker compose: 
-
-(in dir with docker-compose.yml)
-
-docker compose up
-
-
-cloud run loop: 
-
-INPUT_PATHS=("nefsc-1/bottom_mounted/NEFSC_MA-RI/NEFSC_MA-RI_202103_NS02/5420_48kHz_UTC" "nefsc-1/bottom_mounted/NEFSC_SBNMS/NEFSC_SBNMS_202004_SB01/67403784_48kHz" "nefsc-1/bottom_mounted/NEFSC_GOM/NEFSC_GOM_202204_YORK/NEFSC_GOM_202204_YORK_ST/5419_48kHz_UTC" "nefsc-1/bottom_mounted/NEFSC_SBNMS/NEFSC_SBNMS_202206_SB03/1677778970_48kHz" "nefsc-1/bottom_mounted/NEFSC_GOM/NEFSC_GOM_202107_LUBEC/NEFSC_GOM_202107_LUBEC_ST/5426_48kHz_UTC")
-
-LENGTH=${#INPUT_PATHS[@]}
-
-for (( i=0; i<LENGTH; i++ )); do
-
-  DATA_PATH="${INPUT_PATHS[$i]}"
-  OUTPUT_PATH=pamdata-app-outputs/nefsc_minke/prod
-  DEPLOYMENT_ID='parallel-nefsc-data-batchsize-1024'
-
-  RECURSIVE=True
-  EXTENSION=.wav
-  BATCH_SIZE=1024
-  CHANNEL=1
-  SUMMARY_TIME_OFFSET=-5
-  THRESHOLD=0.1
-  MIN_CONFIDENCE=0.6
-  CHUNK_SIZE_SEC=3600
-
-gcloud beta run jobs deploy nefsc-minke-detector-$DEPLOYMENT_ID-$i --update-env-vars DEPLOYMENT_ID=${DEPLOYMENT_ID},CHANNEL=${CHANNEL},EXTENSION=${EXTENSION},BATCH_SIZE=${BATCH_SIZE},STEP_SEC=${STEP_SEC},SMOOTH_SEC=${SMOOTH_SEC},THRESHOLD=${THRESHOLD},MIN_DUR_SEC=${MIN_DUR_SEC},MAX_DUR_SEC=${MAX_DUR_SEC},CLASS_ID=${CLASS_ID},CHUNK_SIZE_SEC=${CHUNK_SIZE_SEC},MIN_CONFIDENCE=${MIN_CONFIDENCE},RECURSIVE=${RECURSIVE},SUMMARY_TIME_OFFSET=${SUMMARY_TIME_OFFSET} --image us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest --add-volume name=input-volume,type=cloud-storage,bucket=$(echo $DATA_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $DATA_PATH | cut -d "/" -f2-) --add-volume name=output-volume,type=cloud-storage,bucket=$(echo $OUTPUT_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $OUTPUT_PATH | cut -d "/" -f2-)/$(echo $DATA_PATH | rev | cut -d "/" -f1-2 | rev) --add-volume-mount volume=input-volume,mount-path=/input --add-volume-mount volume=output-volume,mount-path=/output --service-account=app-dev-sa@ggn-nmfs-pamdata-prod-1.iam.gserviceaccount.com --region=us-east4 --memory=32Gi --cpu 8 --task-timeout 168h --labels deployment-id=${DEPLOYMENT_ID} --labels detector-name=nefsc-minke-detector
-
-gcloud run jobs execute nefsc-minke-detector-$DEPLOYMENT_ID-$i --region=us-east4;
-
-done
-
-#another example:
+RECURSIVE=True
+EXTENSION=.wav
+BATCH_SIZE=512
+#BATCH_SIZE=1024 #can comment out parameters you are switching between
+CHANNEL=1
+SUMMARY_TIME_OFFSET=-5
+THRESHOLD=0.1
+MIN_CONFIDENCE=0.6
+CHUNK_SIZE_SEC=3600
 
 INPUT_PATHS=("nefsc-1/bottom_mounted/NEFSC_DE/NEFSC_DE_202311_DB03/6106_48kHz_UTC" "nefsc-1/bottom_mounted/NEFSC_GOM/NEFSC_GOM_202108_MATINICUS/NEFSC_GOM_202108_MATINICUS_ST/5429_48kHz_UTC")
 
+###########Do not modify
+
 LENGTH=${#INPUT_PATHS[@]}
 
 for (( i=0; i<LENGTH; i++ )); do
 
   DATA_PATH="${INPUT_PATHS[$i]}"
-  OUTPUT_PATH=pamdata-app-outputs/nefsc_minke/prod
-  DEPLOYMENT_ID='parallel-nefsc-data-batchsize-512'
 
-  RECURSIVE=True
-  EXTENSION=.wav
-  BATCH_SIZE=512
-  CHANNEL=1
-  SUMMARY_TIME_OFFSET=-5
-  THRESHOLD=0.1
-  MIN_CONFIDENCE=0.6
-  CHUNK_SIZE_SEC=3600
+  gcloud beta run jobs deploy nefsc-minke-detector-$DEPLOYMENT_ID-$i --update-env-vars DEPLOYMENT_ID=${DEPLOYMENT_ID},CHANNEL=${CHANNEL},EXTENSION=${EXTENSION},BATCH_SIZE=${BATCH_SIZE},STEP_SEC=${STEP_SEC},SMOOTH_SEC=${SMOOTH_SEC},THRESHOLD=${THRESHOLD},MIN_DUR_SEC=${MIN_DUR_SEC},MAX_DUR_SEC=${MAX_DUR_SEC},CLASS_ID=${CLASS_ID},CHUNK_SIZE_SEC=${CHUNK_SIZE_SEC},MIN_CONFIDENCE=${MIN_CONFIDENCE},RECURSIVE=${RECURSIVE},SUMMARY_TIME_OFFSET=${SUMMARY_TIME_OFFSET} --image us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest --add-volume name=input-volume,type=cloud-storage,bucket=$(echo $DATA_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $DATA_PATH | cut -d "/" -f2-) --add-volume name=output-volume,type=cloud-storage,bucket=$(echo $OUTPUT_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $OUTPUT_PATH | cut -d "/" -f2-)/$(echo $DATA_PATH | cut -d "/" -f3-) --add-volume-mount volume=input-volume,mount-path=/input --add-volume-mount volume=output-volume,mount-path=/output --service-account=nefsc-minke-detector@ggn-nmfs-pamdata-prod-1.iam.gserviceaccount.com --region=us-east4 --memory=32Gi --cpu 8 --task-timeout 168h --labels deployment-id=${DEPLOYMENT_ID} --labels detector-name=nefsc-minke-detector
 
-gcloud beta run jobs deploy nefsc-minke-detector-$DEPLOYMENT_ID-$i --update-env-vars DEPLOYMENT_ID=${DEPLOYMENT_ID},CHANNEL=${CHANNEL},EXTENSION=${EXTENSION},BATCH_SIZE=${BATCH_SIZE},STEP_SEC=${STEP_SEC},SMOOTH_SEC=${SMOOTH_SEC},THRESHOLD=${THRESHOLD},MIN_DUR_SEC=${MIN_DUR_SEC},MAX_DUR_SEC=${MAX_DUR_SEC},CLASS_ID=${CLASS_ID},CHUNK_SIZE_SEC=${CHUNK_SIZE_SEC},MIN_CONFIDENCE=${MIN_CONFIDENCE},RECURSIVE=${RECURSIVE},SUMMARY_TIME_OFFSET=${SUMMARY_TIME_OFFSET} --image us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest --add-volume name=input-volume,type=cloud-storage,bucket=$(echo $DATA_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $DATA_PATH | cut -d "/" -f2-) --add-volume name=output-volume,type=cloud-storage,bucket=$(echo $OUTPUT_PATH | cut -d "/" -f1),mount-options=only-dir=$(echo $OUTPUT_PATH | cut -d "/" -f2-)/$(echo $DATA_PATH | rev | cut -d "/" -f1-2 | rev) --add-volume-mount volume=input-volume,mount-path=/input --add-volume-mount volume=output-volume,mount-path=/output --service-account=app-dev-sa@ggn-nmfs-pamdata-prod-1.iam.gserviceaccount.com --region=us-east4 --memory=32Gi --cpu 8 --task-timeout 168h --labels deployment-id=${DEPLOYMENT_ID}
-
-gcloud run jobs execute nefsc-minke-detector-$DEPLOYMENT_ID-$i --region=us-east4;
+  gcloud run jobs execute nefsc-minke-detector-$DEPLOYMENT_ID-$i --region=us-east4;
 
 done
 

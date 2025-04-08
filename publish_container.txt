@@ -1,0 +1,10 @@
+#publish container
+
+docker build -t nefsc-minke-detector .
+
+gcloud auth configure-docker us-east4-docker.pkg.dev
+
+docker tag nefsc-minke-detector us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest
+
+DOCKER_CONTENT_TRUST=0 docker push us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest
+
