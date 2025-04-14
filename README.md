@@ -5,7 +5,7 @@ The branch 'docker' takes the needed logic of the minke whale detector and deliv
 
 To use this container with docker compose, when in this cloned repo (in a docker configured host) type 'docker compose up'. 
 
-An example of using this container in Cloud Run is in https://github.com/nmfs-ost/PAM-Cloud/code/use_minke_detector_ex.sh
+An example of using this container in Cloud Run is in https://github.com/nmfs-ost/PAM-Cloud/blob/main/code/use_minke_detector_ex.sh
 
 
 
