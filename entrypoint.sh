@@ -40,6 +40,8 @@ CMD2+=" --detec_dir=/output/"
 echo $CMD2
 eval $CMD2
 
+CMD3+=" $DATA_PATH"
+
 echo $CMD3
 eval $CMD3
 
