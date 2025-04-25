@@ -21,9 +21,9 @@ print(detec.summary())
 #hardcode the output path of the aggregated file to the pam-ww which is the current intended analysis location. 
 
 # update audio files path:
-audio_files_dir = f"C:\\pamdata_mount\\{audio_dir)}"
-print('Updating path of the audio files')
-detec.update_audio_dir(audio_files_dir)
+audio_files_dir = f"C:\\pamdata_mount\\{audio_dir}"
+print('Updating path of the audio files; Xavier change suggestion for non-available paths')
+detec.insert_values(audio_file_dir=audio_files_dir)
 
 # save master nc file:
 print('Saving merged detections to the file detections_dataset.nc')
