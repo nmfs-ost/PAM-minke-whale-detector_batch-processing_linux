@@ -27,9 +27,9 @@ services:
       - .:/config
       - ./output:/mnt/output:shared
   nefsc-minke-detector:
-    #build:
-    #  context: .
-    image: us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest
+    build:
+      context: .
+    #image: us-east4-docker.pkg.dev/ggn-nmfs-pamdata-prod-1/pamdata-docker-repo/nefsc-minke-detector:latest
     depends_on:
       - rclone-input
       - rclone-output

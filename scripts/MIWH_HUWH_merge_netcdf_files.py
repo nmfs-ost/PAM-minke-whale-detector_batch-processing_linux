@@ -6,6 +6,7 @@
 from ecosound.core.annotation import Annotation
 from ecosound.core.measurement import Measurement
 import os
+import sys 
 
 #feed in ENV variable
 audio_dir = sys.argv[1]
