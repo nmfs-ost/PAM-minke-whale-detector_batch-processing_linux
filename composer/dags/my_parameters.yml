@@ -1,0 +1,17 @@
+OUTPUT_PATH: pamdata-app-outputs/appdev/minke_composer_test
+DEPLOYMENT_ID: 'test-composer-deployment' #allows us to distinguish different runs by billing/stats. Not needed to change each time in production, but good practice (helps you locate cloud run information if needed)
+RECURSIVE: True
+EXTENSION: .wav
+BATCH_SIZE: 512
+#BATCH_SIZE=1024 #can comment out parameters you are switching between
+CHANNEL: 1
+SUMMARY_TIME_OFFSET: -5
+THRESHOLD: 0.1
+MIN_CONFIDENCE: 0.6
+CHUNK_SIZE_SEC: 3600
+
+#full cloud path, each item in quotes, separated by space, one or multiple. 
+INPUT_PATHS: 
+#- "nefsc-1/bottom_mounted/NEFSC_DE/NEFSC_DE_202311_DB03/6106_48kHz_UTC"
+#- "afsc-1/bottom_mounted/BS13_AU_PM02-a/05_2013"
+- "pamdata-app-intermediates/appdev/humpback_nefsc_test_data/test2"

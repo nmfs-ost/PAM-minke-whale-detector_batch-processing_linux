@@ -1,0 +1,12 @@
+- git vs dynamic bucket- not worth figuring out until we determine this is worth investing in. 
+
+Need to authenticate the service account all around to pamdata. Needs to:
+
+1. deploy cloud run jobs. 
+  - read artifact repo artifacts
+2. run cloud run jobs 
+
+Development: 
+1. need to call the actual cloud run API at https level. So, need to refactor the cloud run calls. There are some templates to do that already for cloud run, have geetps help with deploy. (could start backwards: make the task to run and then manually do deploy for easier testing/learning). 
+2. Create the flow for a single mooring, then create a parent task to split off with dynamic task mapping (https://airflow.apache.org/docs/apache-airflow/stable/authoring-and-scheduling/dynamic-task-mapping.html#mapping-over-a-task-group)
+
