@@ -393,13 +393,13 @@ def zip_inputs(outputs,sources):
     schedule_interval=None, # Run manually or set a schedule
     catchup=False,
     default_args={"retries":0},
-    tags=['test', 'detector', 'minke','dfw'],
+    tags=['test', 'detector', 'minke','dfw','dev'],
     params={
         "run_params_yaml_and_summary_bucket_name": "pamdata-app-intermediates",
         "run_params_yaml_path": "composer/my_run/my_parameters.yml",
         "summary_dir": "composer/my_run/"
     },
-    doc_md="testing basic flow, airflow dependencies, authentication"
+    doc_md="NEFSC minke detector authored by Xavier Muoy and migrated by Dan Woodrich"
 )
 def dag_():
 
